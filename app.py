@@ -1,12 +1,14 @@
 import eventlet
 eventlet.monkey_patch()
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 from flask_socketio import SocketIO, emit
 import json
 import random
 import logging
 import netifaces
+import qrcode
+import io
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
@@ -188,6 +190,16 @@ def handle_update_timer(data):
 @socketio.on('update_guessing_percent')
 def handle_update_guessing_percent(data):
     emit('update_guessing_percent', data, broadcast=True, include_self=False)
+
+
+@app.route('/qrcode')
+def generate_qr():
+    url = f"http://{get_local_ip()}:5001"
+    img = qrcode.make(url)
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    buf.seek(0)
+    return send_file(buf, mimetype='image/png')
 
 if __name__ == '__main__':
     logging.info(f"🌐 Game running at: http://{get_local_ip()}:5001")

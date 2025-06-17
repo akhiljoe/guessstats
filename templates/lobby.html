@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -132,6 +132,178 @@
     socket.on('game_started', () => {
       window.location.href = '/game';
     });
+  </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lobby</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0f0f;
+      color: #f1f1f1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 20px;
+      min-height: 100vh;
+      margin: 0;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+    #playersList {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+    .player {
+      display: flex;
+      align-items: center;
+      background: #1f1f1f;
+      padding: 10px 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #00ffcc33;
+      transition: background 0.3s ease;
+    }
+    .player:hover {
+      background: #00ffcc22;
+    }
+    .player img {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      margin-right: 15px;
+      border: 2px solid transparent;
+      transition: border-color 0.3s ease;
+    }
+    .player.admin img {
+      border-color: #00ffcc;
+      box-shadow: 0 0 8px #00ffccaa;
+    }
+    .player span {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    #startGameBtn {
+      padding: 12px 30px;
+      font-size: 18px;
+      font-weight: bold;
+      background: #00ffcc;
+      color: #121212;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 15px #00ffccaa;
+      transition: background 0.2s ease;
+      margin-top: 20px;
+    }
+    #startGameBtn:hover:not(:disabled) {
+      background: #00ddb3;
+    }
+    #startGameBtn:disabled {
+      background: #555;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    #qrSection {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    #qrSection img {
+      width: 200px;
+      height: 200px;
+      border: 4px solid #00ffcc;
+      border-radius: 16px;
+      margin-bottom: 10px;
+    }
+
+    #qrSection a {
+      color: #00ffcc;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    #qrSection a:hover {
+      text-decoration: underline;
+    }
+  </style>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>🎮 Waiting Room</h1>
+  <div id="playersList"></div>
+  <button id="startGameBtn" style="display:none;" disabled>Start Game</button>
+
+  <div id="qrSection">
+    <img src="/qrcode" alt="QR Code to Join Game" />
+    <div>Scan to join or go to <a id="gameLink" href="#">this link</a></div>
+  </div>
+
+  <script>
+    const socket = io();
+    const myName = localStorage.getItem('name');
+    const myAvatar = localStorage.getItem('avatar');
+
+    if (!myName || !myAvatar) {
+      alert('Please enter your name and select an avatar first.');
+      window.location.href = '/';
+    }
+
+    socket.on('connect', () => {
+      socket.emit('join', { name: myName, avatar: myAvatar });
+    });
+
+    socket.on('lobby_update', data => {
+      const { players, avatars, admin_name } = data;
+      const playersDiv = document.getElementById('playersList');
+      playersDiv.innerHTML = '';
+
+      players.forEach(p => {
+        const playerDiv = document.createElement('div');
+        playerDiv.classList.add('player');
+        if (p === admin_name) playerDiv.classList.add('admin');
+
+        const avatarUrl = avatars[p] || 'https://via.placeholder.com/48?text=?';
+        playerDiv.innerHTML = `
+          <img src="${avatarUrl}" alt="${p}'s avatar" />
+          <span>${p}${p === admin_name ? ' (Admin)' : ''}</span>
+        `;
+        playersDiv.appendChild(playerDiv);
+      });
+
+      const startBtn = document.getElementById('startGameBtn');
+      if (myName === admin_name) {
+        startBtn.style.display = 'inline-block';
+        startBtn.disabled = players.length < 2;
+      } else {
+        startBtn.style.display = 'none';
+      }
+    });
+
+    document.getElementById('startGameBtn').addEventListener('click', () => {
+      socket.emit('start_game');
+    });
+
+    socket.on('game_started', () => {
+      window.location.href = '/game';
+    });
+
+    // Update join link with current host
+    document.getElementById('gameLink').href = window.location.origin;
+    document.getElementById('gameLink').textContent = window.location.origin;
   </script>
 </body>
 </html>
