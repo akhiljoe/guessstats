@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Join Game</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #222; color: #eee; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .container { background: #333; padding: 20px; border-radius: 10px; width: 320px; text-align: center; }
+    input[type="text"] { width: 100%; padding: 10px; border-radius: 5px; border: none; margin-bottom: 15px; font-size: 16px; }
+    .avatars { display: flex; justify-content: space-between; margin-bottom: 15px; }
+    .avatar { cursor: pointer; border: 3px solid transparent; border-radius: 50%; width: 50px; height: 50px; transition: border-color 0.2s; }
+    .avatar.selected { border-color: #00ffcc; }
+    button { padding: 10px 20px; font-size: 16px; background: #00ffcc; border: none; border-radius: 5px; cursor: pointer; }
+    button:disabled { background: #555; cursor: not-allowed; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Enter your name</h2>
+    <input type="text" id="nameInput" placeholder="Your name" />
+    <h3>Select an avatar</h3>
+    <div class="avatars" id="avatars">
+      <img src="https://i.pravatar.cc/50?img=1" class="avatar" data-avatar="https://i.pravatar.cc/50?img=1" />
+      <img src="https://i.pravatar.cc/50?img=2" class="avatar" data-avatar="https://i.pravatar.cc/50?img=2" />
+      <img src="https://i.pravatar.cc/50?img=3" class="avatar" data-avatar="https://i.pravatar.cc/50?img=3" />
+      <img src="https://i.pravatar.cc/50?img=4" class="avatar" data-avatar="https://i.pravatar.cc/50?img=4" />
+      <img src="https://i.pravatar.cc/50?img=5" class="avatar" data-avatar="https://i.pravatar.cc/50?img=5" />
+    </div>
+    <button id="joinBtn" disabled>Join Game</button>
+  </div>
+
+  <script>
+    let selectedAvatar = null;
+    const avatars = document.querySelectorAll('.avatar');
+    const nameInput = document.getElementById('nameInput');
+    const joinBtn = document.getElementById('joinBtn');
+
+    avatars.forEach(av => {
+      av.addEventListener('click', () => {
+        avatars.forEach(a => a.classList.remove('selected'));
+        av.classList.add('selected');
+        selectedAvatar = av.getAttribute('data-avatar');
+        checkEnableJoin();
+      });
+    });
+
+    nameInput.addEventListener('input', checkEnableJoin);
+
+    function checkEnableJoin() {
+      joinBtn.disabled = !(nameInput.value.trim() && selectedAvatar);
+    }
+
+    joinBtn.addEventListener('click', () => {
+      localStorage.setItem('name', nameInput.value.trim());
+      localStorage.setItem('avatar', selectedAvatar);
+      window.location.href = '/lobby';
+    });
+  </script>
+</body>
+</html>

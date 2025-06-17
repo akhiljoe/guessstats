@@ -1,0 +1,614 @@
+<!-- ✅ ONLY THE lowerBtn.onclick changed to use 'submit_guess'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Guess The Stats – Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body {
+      display: flex;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #eee;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #avatars {
+      flex: 0 0 80px;
+      background: #1f1f1f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 10px;
+    }
+    .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin: 10px 0;
+      opacity: 0.6;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .avatar.active {
+      opacity: 1;
+      transform: scale(1.2);
+      border: 2px solid #00ffcc;
+      box-shadow: 0 0 10px #00ffcc88;
+    }
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+    #centerAvatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    #centerAvatar.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+    #playerName { font-size: 1.5rem; margin-bottom: 10px; }
+    #question { font-size: 1.2rem; margin-bottom: 20px; max-width: 600px; }
+    #inputArea input { padding: 8px; font-size: 1rem; width: 120px; margin-right: 10px; }
+    #inputArea button { padding: 8px 12px; font-size: 1rem; cursor: pointer; margin: 0 5px; }
+    #results { margin-top: 20px; font-size: 1.1rem; color: #00ffcc; }
+    #scores { margin-top: 30px; list-style: none; padding: 0; }
+    #scores li { margin: 5px 0; }
+  </style>
+</head>
+<body>
+  <div id="avatars"></div>
+
+  <div id="main">
+    <img id="centerAvatar" src="" alt="Active" />
+    <div id="playerName">Waiting...</div>
+    <div id="question">Game will start soon.</div>
+    <div id="inputArea"></div>
+    <div id="results"></div>
+    <ul id="scores"></ul>
+  </div>
+<div id="finalResults" style="display:none; text-align:center; margin-top:30px;">
+  <h2>🏁 Final Rankings</h2>
+  <ul id="finalScores" style="list-style: none; padding: 0;"></ul>
+  <button id="restartBtn" style="margin-top: 20px; padding: 10px 20px; font-size: 1rem; cursor: pointer;">
+    🔁 Play Again
+  </button>
+</div>
+
+  <script>
+    const socket = io();
+    const myName = localStorage.getItem('name');
+    const myAvatar = localStorage.getItem('avatar');
+    let players = [];
+
+    socket.on('game_started', () => {
+      document.getElementById('question').innerText = 'Game Starting...';
+    });
+
+    socket.on('start_round', data => {
+      console.log("📩 new_question received:", data);
+      players = data.allPlayers || players;
+      renderAvatars(data.player);
+      showQuestion(data);
+    });
+
+    function renderAvatars(activeName) {
+      const avatarsDiv = document.getElementById('avatars');
+      avatarsDiv.innerHTML = '';
+      Object.entries(players).forEach(([name, avatar]) => {
+        const img = document.createElement('img');
+        img.src = avatar;
+        img.className = 'avatar ' + (name === activeName ? 'active' : '');
+        avatarsDiv.appendChild(img);
+      });
+    }
+
+    function showQuestion({ player, avatar, question }) {
+      const img = document.getElementById('centerAvatar');
+      img.src = avatar;
+      img.classList.add('visible');
+
+      document.getElementById('playerName').innerText = player;
+      document.getElementById('question').innerText = question;
+      document.getElementById('results').innerText = '';
+      document.getElementById('inputArea').innerHTML = '';
+
+      if (player === myName) {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.placeholder = 'Enter your guess (%)';
+
+        const btn = document.createElement('button');
+        btn.onclick = () => {
+          const guess = parseInt(input.value);
+          if (!isNaN(guess) && guess >= 0 && guess <= 100) {
+            socket.emit('submit_answer', { player: myName, percent: guess });
+            document.getElementById('inputArea').innerText = 'Waiting...';
+          } else {
+            alert('Please enter a number between 0 and 100');
+          }
+        };
+
+        document.getElementById('inputArea').append(input, btn);
+      }
+    }
+
+    socket.on('guess_hilo', data => {
+      document.getElementById('results').innerText = `${data.player} guessed ${data.percent}%. Your turn to guess Higher or Lower.`;
+      if (myName !== data.player) {
+        const inputArea = document.getElementById('inputArea');
+        inputArea.innerHTML = '';
+
+        const higherBtn = document.createElement('button');
+        higherBtn.innerText = 'Higher';
+        higherBtn.onclick = () => {
+          socket.emit('submit_guess', { guess: 'higher', player: myName });
+          inputArea.innerText = 'Waiting...';
+        };
+
+        const lowerBtn = document.createElement('button');
+        lowerBtn.innerText = 'Lower';
+        lowerBtn.onclick = () => {
+          socket.emit('submit_guess', { guess: 'lower', player: myName });  // ✅ fixed to use 'submit_guess'
+          inputArea.innerText = 'Waiting...';
+        };
+
+        inputArea.append(higherBtn, lowerBtn);
+      }
+    });
+
+    socket.on('reveal', data => {
+      document.getElementById('results').innerText =
+        `Actual Answer: ${data.real_answer}%. Scores updated.`;
+      renderScores(data.scores);
+    });
+
+    function renderScores(scores) {
+      const ul = document.getElementById('scores');
+      ul.innerHTML = '';
+      Object.entries(scores).forEach(([name, score]) => {
+        const li = document.createElement('li');
+        li.innerText = `${name}: ${score}`;
+        ul.appendChild(li);
+      });
+    }
+
+    socket.on('game_over', data => {
+    document.getElementById('main').style.display = 'none';
+
+    const final = Object.entries(data.scores)
+        .sort((a, b) => b[1] - a[1]);
+
+    const finalScoresUL = document.getElementById('finalScores');
+    finalScoresUL.innerHTML = '';
+
+    final.forEach(([name, score], i) => {
+        const li = document.createElement('li');
+        li.style.opacity = 0;
+        li.style.transform = 'translateY(20px)';
+        li.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        li.innerText = `${i + 1}. ${name} – ${score} pts`;
+        finalScoresUL.appendChild(li);
+
+        setTimeout(() => {
+        li.style.opacity = 1;
+        li.style.transform = 'translateY(0)';
+        }, i * 300);
+    });
+
+    document.getElementById('finalResults').style.display = 'block';
+
+    document.getElementById('restartBtn').onclick = () => {
+        window.location.href = '/'; // Or redirect to join.html if that’s your lobby page
+    };
+    });
+  </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Guess The Stats – Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-dragdata@2.0.0"></script>
+  <style>
+    body {
+      display: flex;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #eee;
+      height: 100vh;
+      overflow: hidden;
+    }
+    #avatars {
+      flex: 0 0 80px;
+      background: #1f1f1f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 10px;
+    }
+    .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin: 10px 0;
+      opacity: 0.6;
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .avatar.active {
+      opacity: 1;
+      transform: scale(1.2);
+      border: 2px solid #00ffcc;
+      box-shadow: 0 0 10px #00ffcc88;
+    }
+    #main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+      position: relative;
+    }
+    #centerAvatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 0.5s, transform 0.5s;
+    }
+    #centerAvatar.visible {
+      opacity: 1;
+      transform: scale(1);
+    }
+    #playerName {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+    }
+    #question {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      max-width: 600px;
+    }
+    #chartContainer {
+      position: relative;
+      width: 300px;
+      height: 200px;
+      margin: 0 auto;
+      display: none;
+    }
+    #pieChart {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    #timer {
+      position: absolute;
+      right: -100px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 2rem;
+      color: #ffcc00;
+    }
+    #inputArea button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background: #00ffcc;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      color: #000;
+    }
+    #results {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      color: #00ffcc;
+    }
+    #scores {
+      margin-top: 30px;
+      list-style: none;
+      padding: 0;
+    }
+    #scores li {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="avatars"></div>
+  <div id="main">
+    <img id="centerAvatar" src="" alt="Active" />
+    <div id="playerName">Waiting...</div>
+    <div id="question">Game will start soon.</div>
+
+    <div id="chartContainer">
+    <canvas id="pieChart"></canvas>
+    <div id="selectedPercent" style="position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); font-size: 24px; color: #fff; font-weight: bold;">50%</div>
+    <div id="timer">30s</div>
+    </div>
+
+    <div id="inputArea"></div>
+    <div id="results"></div>
+    <ul id="scores"></ul>
+  </div>
+
+  <script>
+    const socket = io();
+    const myName = localStorage.getItem('name');
+    let players = [];
+
+    socket.on('game_started', () => {
+      document.getElementById('question').innerText = 'Game Starting...';
+    });
+
+    socket.on('start_round', data => {
+      document.getElementById('question').style.display = '';
+      document.getElementById('results').innerText = '';
+      players = data.allPlayers || players;
+      renderAvatars(data.player);
+      setupRound(data);
+    });
+
+    socket.on('update_guessing_percent', ({ value }) => {
+      if (guessChart) {
+        guessChart.data.datasets[0].data = [value, 100 - value];
+        guessChart.update();
+        document.getElementById('selectedPercent').innerText = `${value}%`;
+      }
+    });
+
+    socket.on('guess_hilo', data => {
+      document.getElementById('chartContainer').style.display = 'none';
+      document.getElementById('results').innerText =
+        `${data.player} guessed ${data.percent}%. Your turn to guess Higher or Lower.`;
+      if (myName !== data.player) showHigherLower();
+    });
+
+    socket.on('reveal', data => {
+      document.getElementById('results').innerText =
+        `Actual Answer: ${data.real_answer}%. Scores updated.`;
+      renderScores(data.scores);
+    });
+
+    function renderAvatars(activeName) {
+      const div = document.getElementById('avatars');
+      div.innerHTML = '';
+      Object.entries(players).forEach(([n, avatar]) => {
+        const img = document.createElement('img');
+        img.src = avatar;
+        img.className = 'avatar' + (n === activeName ? ' active' : '');
+        div.appendChild(img);
+      });
+    }
+
+    function setupRound({ player, avatar, question }) {
+      document.getElementById('centerAvatar').src = avatar;
+      document.getElementById('centerAvatar').classList.add('visible');
+      document.getElementById('playerName').innerText = player;
+      document.getElementById('question').innerText = question;
+      document.getElementById('results').innerText = '';
+      document.getElementById('scores').innerHTML = '';
+      document.getElementById('inputArea').innerHTML = '';
+      document.getElementById('chartContainer').style.display = 'none';
+
+      if (player === myName) setupWheelForSelf();
+      else setupWheelForOthers();
+    }
+
+    let guessChart = null;
+
+    function setupWheelForSelf() {
+        const container = document.getElementById('chartContainer');
+        container.style.display = 'block';
+        const ctx = document.getElementById('pieChart').getContext('2d');
+        const percentDisplay = document.getElementById('selectedPercent');
+        let currentGuess = 0;
+        percentDisplay.innerText = `${currentGuess}%`;
+
+        if (guessChart) guessChart.destroy();
+
+        guessChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+            datasets: [{
+                data: [currentGuess, 100 - currentGuess],
+                backgroundColor: ['#00ccff', '#333'],
+                borderWidth: 0
+            }]
+            },
+            options: {
+            rotation: 0,
+            circumference: 360,
+            cutout: '70%',
+            plugins: {
+                tooltip: { enabled: false },
+                legend: { display: false },
+                datalabels: { display: false }
+            }
+            }
+        });
+
+        // 🖱 Clicking sets percentage
+        document.getElementById('pieChart').onclick = function (e) {
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+
+            let angle = Math.atan2(y, x);
+            angle = (angle + Math.PI / 2 + 2 * Math.PI) % (2 * Math.PI);
+
+            const percent = Math.round((angle / (2 * Math.PI)) * 100);
+            currentGuess = percent;
+
+            percentDisplay.innerText = `${currentGuess}%`;
+            guessChart.data.datasets[0].data = [currentGuess, 100 - currentGuess];
+            guessChart.update();
+
+            socket.emit('update_guessing_percent', { value: currentGuess });
+        };
+
+        // ⏱ Send timer to all players
+        let timeLeft = 30;
+        socket.emit('start_timer', { timeLeft }); // tell server to broadcast timer
+        const interval = setInterval(() => {
+            timeLeft--;
+            socket.emit('update_timer', { timeLeft });
+            if (timeLeft <= 0) {
+            clearInterval(interval);
+            autoSubmitRandom();
+            }
+        }, 1000);
+
+        const btn = document.createElement('button');
+        btn.innerText = 'Submit';
+        btn.onclick = () => {
+            clearInterval(interval);
+            socket.emit('submit_answer', { player: myName, percent: currentGuess });
+            document.getElementById('inputArea').innerText = 'Waiting...';
+            container.style.display = 'none';
+        };
+        document.getElementById('inputArea').appendChild(btn);
+        }
+
+
+
+    function autoSubmitRandom() {
+        socket.emit('submit_answer', { player: myName, percent: currentGuess });
+        document.getElementById('inputArea').innerText = 'Auto-submitted!';
+        document.getElementById('chartContainer').style.display = 'none';
+    }
+
+    function setupWheelForOthers() {
+        const container = document.getElementById('chartContainer');
+        container.style.display = 'block';
+        const ctx = document.getElementById('pieChart').getContext('2d');
+        document.getElementById('selectedPercent').innerText = '';
+        if (guessChart) guessChart.destroy();
+        guessChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+            labels: ['Their Guess', 'Remaining'],
+            datasets: [{
+                data: [0, 100],
+                backgroundColor: ['#00ffcc', '#333']
+            }]
+            },
+            options: {
+            rotation: 0,
+            circumference: 360,  // ✅ Full circle
+            plugins: {
+                datalabels: {
+                display: true,
+                formatter: (value, ctx) => ctx.dataIndex === 0 ? `${value}%` : '',
+                color: '#fff',
+                font: { weight: 'bold', size: 18 }
+                },
+                tooltip: { enabled: false },
+                legend: { display: false }
+            }
+            },
+            plugins: [ChartDataLabels]
+        });
+        document.getElementById('pieChart').onclick = null;
+        }
+
+
+    function showHigherLower() {
+      const inputArea = document.getElementById('inputArea');
+      inputArea.innerHTML = '';
+      ['Higher', 'Lower'].forEach(direction => {
+        const btn = document.createElement('button');
+        btn.innerText = direction;
+        btn.onclick = () => {
+          socket.emit('submit_guess', { guess: direction.toLowerCase(), player: myName });
+          inputArea.innerText = 'Waiting...';
+        };
+        inputArea.appendChild(btn);
+      });
+    }
+
+    function renderScores(scores) {
+      const ul = document.getElementById('scores');
+      ul.innerHTML = '';
+      Object.entries(scores).forEach(([n, s]) => {
+        const li = document.createElement('li');
+        li.innerText = `${n}: ${s}`;
+        ul.appendChild(li);
+      });
+    }
+
+    socket.on('show_timer', ({ timeLeft }) => {
+        const timerEl = document.getElementById('timer');
+        timerEl.innerText = `${timeLeft}s`;
+        });
+    
+    socket.on('game_over', ({ scores }) => {
+    const main = document.getElementById('main');
+
+    // Clear the screen
+    main.innerHTML = `<div id="finalLeaderboard" style="text-align: center; width: 100%;">
+        <h2 style="font-size: 2rem; margin-bottom: 20px;">🏁 Final Scores</h2>
+        <div id="leaderboardList" style="display: flex; flex-direction: column; align-items: center;"></div>
+    </div>`;
+
+    // Sort scores from lowest to highest
+    const sorted = Object.entries(scores).sort((a, b) => a[1] - b[1]);
+
+    // Show animated leaderboard
+    sorted.forEach(([name, score], i) => {
+        setTimeout(() => {
+        const div = document.createElement('div');
+        div.style.cssText = `
+            display: flex;
+            align-items: center;
+            background: #222;
+            border-radius: 10px;
+            margin: 10px;
+            padding: 10px 20px;
+            width: 300px;
+            transform: scale(0.8);
+            opacity: 0;
+            transition: all 0.5s ease;
+        `;
+        div.innerHTML = `
+            <img src="${players[name]}" style="width: 40px; height: 40px; border-radius: 50%; margin-right: 15px;">
+            <span style="flex: 1; text-align: left;">${name}</span>
+            <strong style="color: #00ffcc">${score}</strong>
+        `;
+        document.getElementById('leaderboardList').appendChild(div);
+
+        // Animate in
+        setTimeout(() => {
+            div.style.opacity = '1';
+            div.style.transform = 'scale(1)';
+        }, 50);
+        }, i * 300);
+    });
+    });
+  </script>
+</body>
+</html>
