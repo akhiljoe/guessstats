@@ -9,7 +9,9 @@ import logging
 import netifaces
 import qrcode
 import io
+import random
 
+room_code = None
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
@@ -22,6 +24,10 @@ admin_name = None
 current_turn = 0
 answers = {}
 scores = {}
+
+
+def generate_room_code():
+    return str(random.randint(1000, 9999))
 
 # Questions setup
 with open('questions.json') as f:
@@ -190,16 +196,6 @@ def handle_update_timer(data):
 @socketio.on('update_guessing_percent')
 def handle_update_guessing_percent(data):
     emit('update_guessing_percent', data, broadcast=True, include_self=False)
-
-
-@app.route('/qrcode')
-def generate_qr():
-    url = f"http://{get_local_ip()}:5001"
-    img = qrcode.make(url)
-    buf = io.BytesIO()
-    img.save(buf, format='PNG')
-    buf.seek(0)
-    return send_file(buf, mimetype='image/png')
 
 if __name__ == '__main__':
     logging.info(f"🌐 Game running at: http://{get_local_ip()}:5001")

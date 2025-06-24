@@ -15,144 +15,39 @@
   {"question": "What percentage of people have eaten food from the floor?", "answer": 58},
   {"question": "What percentage of people believe in ghosts?", "answer": 52},
   {"question": "What percentage of pepole exit partys without telling people they're leaving?", "answer": 25},
-  {
-    "question": "What percentage of people have purchased condoms from gas station bathroom dispensers?",
-    "answer": 17
-  },
-  {
-    "question": "What percentage of people normally do NOT greet them using their first names??",
-    "answer": 63
-  },
-  {
-    "question": "What percentage of people only go to the Dentist when something is wrong??",
-    "answer": 53
-  },
-  {
-    "question": "What percentage of people have attended an Ugly Sweater Party??",
-    "answer": 35
-  },
-  {
-    "question": "What percentage of people are more annoyed than anything else??",
-    "answer": 40
-  },
-  {
-    "question": "What percentage of people have ever had usernames (email, Twitter, etc) with the number 69 in them??",
-    "answer": 9
-  },
-  {
-    "question": "What percentage of people keep diaries or journals that they update pretty much daily??",
-    "answer": 4
-  },
-  {
-    "question": "What percentage of people have purchased car washes at gas astations in the past year??",
-    "answer": 43
-  },
-  {
-    "question": "What percentage of people have parachuted out of an aircraft??",
-    "answer": 5
-  },
-  {
-    "question": "What percentage of people own more mittens than they do gloves??",
-    "answer": 5
-  },
-  {
-    "question": "What percentage of people have visitied cemeteries where nobody they knew was buried??",
-    "answer": 73
-  },
-  {
-    "question": "What percentage of people have vaped??",
-    "answer": 32
-  },
-  {
-    "question": "What percentage of people said they would keep working at their jobs if they won $900 million in the lottery??",
-    "answer": 37
-  },
-  {
-    "question": "What percentage of people have left scathing notes on strangers' cars because of poor parking jobs or other vehicular offenses??",
-    "answer": 24
-  },
-  {
-    "question": "What percentage of people regularly talk out loud to themselves when alone??",
-    "answer": 76
-  },
-  {
-    "question": "What percentage of epople reguarly cut off, or avoid eating, the crusts on their sandwiches??",
-    "answer": 13
-  },
-  {
-    "question": "What percentage of people prefer brownies with nuts over nutless brownies??",
-    "answer": 30
-  },
-  {
-    "question": "What percentage of people have donated to crowdfunding projects??",
-    "answer": 70
-  },
-  {
-    "question": "What percentage of people have photobombed total strangers??",
-    "answer": 53
-  },
-  {
-    "question": "What percentage of people woudl rather come up with different usernames than different passwords??",
-    "answer": 30
-  },
-  {
-    "question": "What percentage of people like their orange juice with pulp rather than pulp-free??",
-    "answer": 44
-  },
-  {
-    "question": "What percentage of people own movies starring Gerard Depardieu??",
-    "answer": 8
-  },
-  {
-    "question": "What percentage of people prefer The Rolling Stones to The Beatles??",
-    "answer": 23
-  },
-  {
-    "question": "What percentage of people have used a search engine to get information about someone before a first date??",
-    "answer": 39
-  },
-  {
-    "question": "What percentage of people have functioning VCRs in their homes??",
-    "answer": 42
-  },
-  {
-    "question": "What percentage of people regularly pay for things costing less than a dollar with credit cards??",
-    "answer": 3
-  },
-  {
-    "question": "What percentage of people would generally rather clean the toilet than wash the dishes??",
-    "answer": 32
-  },
-  {
-    "question": "What percentage of people wash their bed sheets at least once a week??",
-    "answer": 12
-  },
-  {
-    "question": "What percentage of people, at this very moment, have more than five magnets on their refridgerator??",
-    "answer": 77
-  },
-  {
-    "question": "What percentage of people have bought \"As Seen on TV\" or informercial products??",
-    "answer": 66
-  },
-  {
-    "question": "What percentage of people take their Oreos apart before eating them??",
-    "answer": 46
-  },
-  {
-    "question": "What percentage of people have ever put potato chips IN a sandwich??",
-    "answer": 70
-  },
-  {
-    "question": "What percentage of people generally ignore restaurant straws and drink straightfrom the glass??",
-    "answer": 14
-  },
-  {
-    "question": "What percentage of people would, if offered by a sexy vampire, seize the chance to become vampires themselves??",
-    "answer": 45
-  },
-  {
-    "question": "What percentage of people have accidentally walked in on their parents having sex??",
-    "answer": 22
-  }
+  {"question": "What percentage of people have purchased condoms from gas station bathroom dispensers?", "answer": 17},
+  {"question": "What percentage of people normally do NOT greet them using their first names?", "answer": 63},
+  {"question": "What percentage of people only go to the Dentist when something is wrong?", "answer": 53},
+  {"question": "What percentage of people have attended an Ugly Sweater Party?", "answer": 35},
+  {"question": "What percentage of people are more annoyed than anything else?", "answer": 40},
+  {"question": "What percentage of people have ever had usernames (email, Twitter, etc) with the number 69 in them?", "answer": 9},
+  {"question": "What percentage of people keep diaries or journals that they update pretty much daily?", "answer": 4},
+  {"question": "What percentage of people have purchased car washes at gas astations in the past year?", "answer": 43},
+  {"question": "What percentage of people have parachuted out of an aircraft?", "answer": 5},
+  {"question": "What percentage of people own more mittens than they do gloves?", "answer": 5},
+  {"question": "What percentage of people have visitied cemeteries where nobody they knew was buried?", "answer": 73},
+  {"question": "What percentage of people have vaped?", "answer": 32},
+  {"question": "What percentage of people said they would keep working at their jobs if they won $900 million in the lottery?", "answer": 37},
+  {"question": "What percentage of people have left scathing notes on strangers' cars because of poor parking jobs or other vehicular offenses?", "answer": 24},
+  {"question": "What percentage of people regularly talk out loud to themselves when alone?", "answer": 76},
+  {"question": "What percentage of epople reguarly cut off, or avoid eating, the crusts on their sandwiches?", "answer": 13},
+  {"question": "What percentage of people prefer brownies with nuts over nutless brownies?", "answer": 30},
+  {"question": "What percentage of people have donated to crowdfunding projects?", "answer": 70},
+  {"question": "What percentage of people have photobombed total strangers?", "answer": 53},
+  {"question": "What percentage of people woudl rather come up with different usernames than different passwords?", "answer": 30},
+  {"question": "What percentage of people like their orange juice with pulp rather than pulp-free?", "answer": 44},
+  {"question": "What percentage of people own movies starring Gerard Depardieu?", "answer": 8},
+  {"question": "What percentage of people prefer The Rolling Stones to The Beatles?", "answer": 23},
+  {"question": "What percentage of people have used a search engine to get information about someone before a first date?", "answer": 39},
+  {"question": "What percentage of people have functioning VCRs in their homes?", "answer": 42},
+  {"question": "What percentage of people regularly pay for things costing less than a dollar with credit cards?", "answer": 3},
+  {"question": "What percentage of people would generally rather clean the toilet than wash the dishes?", "answer": 32},
+  {"question": "What percentage of people wash their bed sheets at least once a week?", "answer": 12},
+  {"question": "What percentage of people, at this very moment, have more than five magnets on their refridgerator?", "answer": 77},
+  {"question": "What percentage of people have bought 'As Seen on TV' or informercial products?", "answer": 66},
+  {"question": "What percentage of people take their Oreos apart before eating them?", "answer": 46},
+  {"question": "What percentage of people have ever put potato chips in a sandwich?", "answer": 70},
+  {"question": "What percentage of people generally ignore restaurant straws and drink straightfrom the glass?", "answer": 14},
+  {"question": "What percentage of people would, if offered by a sexy vampire, seize the chance to become vampires themselves?", "answer": 45},
+  {"question": "What percentage of people have accidentally walked in on their parents having sex?", "answer": 22},
 ]

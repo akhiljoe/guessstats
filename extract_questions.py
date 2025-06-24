@@ -43,15 +43,12 @@ When a Mariachi band suddely appears, what % of people are more annoyed than any
 
 
 
-pattern = r"% of (.*?) - (\d+)%"
+pattern = r"% of (.*?)\s*[-–]\s*(\d+)%"
 matches = re.findall(pattern, text)
 
-result = [
-    {"question": f"What percentage of {statement}?", "answer": int(percent)}
-    for statement, percent in matches
-]
-
-print(json.dumps(result, indent=2))
+for statement, percent in matches:
+    question = f"What percentage of {statement.rstrip('?').strip()}?"
+    print(f'  {{"question": "{question}", "answer": {int(percent)}}},')
 
 
 
